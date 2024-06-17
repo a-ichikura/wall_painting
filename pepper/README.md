@@ -4,7 +4,7 @@ How to use
 
 Prease rewrite the IP address of Pepper in `practice_mode.py` and `execute_mode.py`.
 ```
-self.app = qi.Application(sys.argv, url="tcps://XX.XX.XX.XX:9503"
+self.app = qi.Application(sys.argv, url="tcps://XX.XX.XX.XX:9503")
 ```
 
 # 2. How to record a motion
@@ -41,10 +41,14 @@ You can play the recorded motion as follows.
 ```
 python3 execute_mode.py
 
-please enter your command: "start" [ENTER}
+please enter your command: "start" [ENTER]
 
 please eneter the motion name: [the name of recorded motion name]
 ```
 
-*Note
-The interactive mode will be `disabled` before practice or execute.
+[!Note]
+>The interactive mode will be `disabled` before practice or execute.
+>`qi` should be install in advance. If you do not have `qi`, try
+>```
+>pip install qi
+>```
