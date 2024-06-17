@@ -47,4 +47,5 @@ please eneter the motion name: [the name of recorded motion name]
 ```
 
 *The interactive mode will be `disabled` before practice or execute.
+
 *`qi` should be install in advance. If you do not have `qi`, try `pip install qi`.
