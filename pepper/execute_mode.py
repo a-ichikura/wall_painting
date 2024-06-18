@@ -65,12 +65,12 @@ class Pepper:
     def init_pose(self):
         print("start to Stand Init")
         self.posture_service.goToPosture("Stand",1.0)
-        time.sleep(3)
+        time.sleep(5)
     
     def play_motion(self,motion_name,json_name):        
         with open(json_name) as f:
             data = ndjson.load(f)
-
+            
         for i in range(len(data)):
             recorded_motion = list(data[i].keys())[0]
             if recorded_motion == motion_name:
@@ -87,7 +87,7 @@ class Pepper:
             print(self.motion_service.getStiffnesses("Body"))
             self.motion_service.setAngles(joint_name,angles_list[i],speed)
             print(angles_list[i])
-            time.sleep(speed)
+            time.sleep(speed+0.1)
 
         print("end up {}".format(motion_name))
         self.init_pose()

@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-
+import os
 import qi
 import sys 
 import time
@@ -82,6 +82,44 @@ class Pepper:
             
 
     def save_json(self,motion_name,json_name,joint_name,speed):
+        if not os.path.isfile(json_name):
+            pass
+            
+        else:   
+            with open(json_name) as f:
+                recorded_data = ndjson.load(f)
+                
+
+            recorded_motions = []
+            for i in range(len(recorded_data)):
+                recorded_motion = list(recorded_data[i].keys())[0]
+                recorded_motions.append(recorded_motion)
+
+            ##もし同じ名前のmotionがすでに登録されていたら上書きする
+            if motion_name in recorded_motions:
+                print("There is already a same name motion. You will rewrite the motion angles.")
+                target_index = recorded_motions.index(motion_name)
+                recorded_data[target_index][motion_name]['angles'] = self.angles_list
+                recorded_data[target_index][motion_name]['joint_name'] = joint_name
+                recorded_data[target_index][motion_name]['speed'] = speed
+                
+
+                for i in range(len(recorded_data)):
+                    data = cl.OrderedDict(recorded_data[i])
+
+                    if i == 0:
+                        with open(json_name,"w") as f:
+                            writer = ndjson.writer(f)
+                            writer.writerow(data)
+                    else:
+                        with open(json_name,"a") as f:
+                            writer = ndjson.writer(f)
+                            writer.writerow(data)
+                return
+            
+        ##同じ名前のmotionが登録されていなかったら/jsonファイルが存在しなかったら新しく追加する
+            else:
+                pass
         motion_list = [motion_name]
         ys = cl.OrderedDict()
         for i in range(len(motion_list)):
