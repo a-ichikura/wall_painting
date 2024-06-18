@@ -38,13 +38,19 @@ class AuthenticatorFactory:
 # session.setClientAuthenticatorFactory(factory)
 # session.connect("tcp://192.168.1.59:9503")
 
+try:
+    input = raw_input
+except NameError:
+    pass
+
 class Pepper:
 
     def __init__(self):
-        self.app = qi.Application(sys.argv, url="tcps://10.0.0.4:9503")
-        logins = ("nao", "nao")
-        factory = AuthenticatorFactory(*logins)
-        self.app.session.setClientAuthenticatorFactory(factory)
+        # self.app = qi.Application(sys.argv, url="tcps://10.0.0.4:9503")
+        # logins = ("nao", "nao")
+        self.app = qi.Application(sys.argv, url="tcp://133.11.216.52:9559")
+        #factory = AuthenticatorFactory(*logins)
+        #self.app.session.setClientAuthenticatorFactory(factory)
         self.app.start()
         self.autonomous_life = self.app.session.service("ALAutonomousLife")
         self.motion_service = self.app.session.service("ALMotion")
@@ -61,7 +67,8 @@ class Pepper:
 
     def get_angles(self,name):
         angles = self.motion_service.getAngles(name,False)
-        print(angles)
+        #print(angles)
+        return angles
         
     def init_pose(self):
         print("start to Stand Init")
@@ -79,6 +86,8 @@ class Pepper:
     def close_hand(self,handName,angles,speed):
         self.motion_service.setStiffnesses(handName,0)
         self.motion_service.setAngles(handName,angles,speed)
+        print("close hand {} {} {} {}".format(handName, angles, speed, self.get_angles(handName)))
+        time.sleep(1)
         
 
 if __name__ == "__main__":
@@ -93,6 +102,7 @@ if __name__ == "__main__":
         try:
             while True:
                 #pepper.grab()
-                pepper.close_hand("RHand",0.5,1.0)
+                pepper.close_hand("RHand",0.0,1.0)
+                #pepper.close_hand("RHand",0.5,1.0)
         except KeyboardInterrupt:
             sys.exit
