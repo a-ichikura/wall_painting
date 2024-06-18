@@ -27,13 +27,15 @@ default = 0.4: "0.4" [ENTER]
 You can choose any joint names as follows.
 http://doc.aldebaran.com/2-0/family/juliette_technical/joints_juliette.html
 
-If the motion is correct, decide the name of motion.
+When the motion is correct, decide the name of motion.
 ```
 please enter the motion name: "example1"
 ```
 
 Then the named motion will be saved in a json file.
 If you want to change the name of a json file, you can change in the main function.
+
+*If you enter the same motion name as the recorded one, the angles, the joint name, and the speed will be rewritten.
 
 
 # 3. How to play a motion
