@@ -1,4 +1,5 @@
 #! /usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import os
 import qi
@@ -44,10 +45,11 @@ class AuthenticatorFactory:
 class Pepper:
 
     def __init__(self):
-        self.app = qi.Application(sys.argv, url="tcps://10.0.0.6:9503")
-        logins = ("nao", "nao")
-        factory = AuthenticatorFactory(*logins)
-        self.app.session.setClientAuthenticatorFactory(factory)
+        self.app = qi.Application(sys.argv, url="tcp://133.11.216.52:9559")
+        # self.app = qi.Application(sys.argv, url="tcps://10.0.0.6:9503")
+        # logins = ("nao", "nao")
+        # factory = AuthenticatorFactory(*logins)
+        # self.app.session.setClientAuthenticatorFactory(factory)
         self.app.start()
         self.autonomous_life = self.app.session.service("ALAutonomousLife")
         self.motion_service = self.app.session.service("ALMotion")
@@ -134,6 +136,13 @@ class Pepper:
             writer = ndjson.writer(f)
             writer.writerow(ys)
 
+# for python2 support
+# https://stackoverflow.com/questions/21731043/use-of-input-raw-input-in-python-2-and-3
+try:
+    input = raw_input
+except NameError:
+    pass
+
 if __name__ == "__main__":
     print("started")
     pepper = Pepper()
@@ -142,10 +151,11 @@ if __name__ == "__main__":
         pepper.AL_set("disabled")
         time.sleep(3.0)
     while not command == "end":
-        joint_name = input("please enter the joint name.\n default = RArm:")
-        speed = input("how much the speed is? \n default = 0.4:")
+        # default RARM といっても、リターン押すとエラーにならない？
+        joint_name = input("please enter the joint name.\n default = RArm:") or "RArm"
+        speed = input("how much the speed is? \n default = 0.4:") or 0.4
         pepper.record_angles(joint_name,speed)
         motion_name = input("please enter the motion name:")
-        json_name = "/home/ichikura/rosielab/pepper/json/motion.json"
+        json_name = os.path.dirname(os.path.realpath(__file__))+"/json/motion.json"
         pepper.save_json(motion_name,json_name,joint_name,speed)
-        command == input("please input start or end:")
+        command = input("please input start or end:")
