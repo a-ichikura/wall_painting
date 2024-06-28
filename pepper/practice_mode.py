@@ -45,11 +45,11 @@ class AuthenticatorFactory:
 class Pepper:
 
     def __init__(self):
-        self.app = qi.Application(sys.argv, url="tcp://133.11.216.52:9559")
-        # self.app = qi.Application(sys.argv, url="tcps://10.0.0.6:9503")
-        # logins = ("nao", "nao")
-        # factory = AuthenticatorFactory(*logins)
-        # self.app.session.setClientAuthenticatorFactory(factory)
+        #self.app = qi.Application(sys.argv, url="tcp://133.11.216.52:9559")
+        self.app = qi.Application(sys.argv, url="tcps://10.0.0.4:9503")
+        logins = ("nao", "nao")
+        factory = AuthenticatorFactory(*logins)
+        self.app.session.setClientAuthenticatorFactory(factory)
         self.app.start()
         self.autonomous_life = self.app.session.service("ALAutonomousLife")
         self.motion_service = self.app.session.service("ALMotion")
@@ -71,6 +71,7 @@ class Pepper:
 
     def record_angles(self,name="RArm",speed="0.4"):
         speed = float(speed)
+        self.motion_service.setStiffnesses("Head",0.0)
         self.motion_service.setStiffnesses("Body",0.0)
         self.angles_list = []
         try:
@@ -150,6 +151,8 @@ if __name__ == "__main__":
     if pepper.AL_get() != "disabled":
         pepper.AL_set("disabled")
         time.sleep(3.0)
+    pepper.motion_service.setStiffnesses("Head",0.0)
+    pepper.motion_service.setStiffnesses("Body",0.0)
     while not command == "end":
         # default RARM といっても、リターン押すとエラーにならない？
         joint_name = input("please enter the joint name.\n default = RArm:") or "RArm"

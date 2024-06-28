@@ -46,11 +46,11 @@ except NameError:
 class Pepper:
 
     def __init__(self):
-        # self.app = qi.Application(sys.argv, url="tcps://10.0.0.4:9503")
-        # logins = ("nao", "nao")
-        self.app = qi.Application(sys.argv, url="tcp://133.11.216.52:9559")
-        #factory = AuthenticatorFactory(*logins)
-        #self.app.session.setClientAuthenticatorFactory(factory)
+        self.app = qi.Application(sys.argv, url="tcps://10.0.0.4:9503")
+        logins = ("nao", "nao")
+        #self.app = qi.Application(sys.argv, url="tcp://133.11.216.52:9559")
+        factory = AuthenticatorFactory(*logins)
+        self.app.session.setClientAuthenticatorFactory(factory)
         self.app.start()
         self.autonomous_life = self.app.session.service("ALAutonomousLife")
         self.motion_service = self.app.session.service("ALMotion")
@@ -84,8 +84,16 @@ class Pepper:
         self.get_angles("RHand")
 
     def close_hand(self,handName,angles,speed):
-        self.motion_service.setStiffnesses(handName,0)
+        self.motion_service.setStiffnesses(handName,1)
         self.motion_service.setAngles(handName,angles,speed)
+        time.sleep(0.1)
+        print("close hand {} {} {} {}".format(handName, angles, speed, self.get_angles(handName)))
+        time.sleep(1)
+
+    def open_hand(self,handName,angles,speed):
+        self.motion_service.setStiffnesses(handName,1)
+        self.motion_service.setAngles(handName,angles,speed)
+        time.sleep(0.1)
         print("close hand {} {} {} {}".format(handName, angles, speed, self.get_angles(handName)))
         time.sleep(1)
         
@@ -93,16 +101,19 @@ class Pepper:
 if __name__ == "__main__":
     print("started")
     pepper = Pepper()
-    command = input("please enter your command:")
     if pepper.AL_get() != "disabled":
         pepper.AL_set("disabled")
         time.sleep(3.0)
-        pepper.init_pose()
-    if command == "grab":
+    pepper.init_pose()
+    while True:
+        command = input("please enter your command:")
+        handName="RHand"
         try:
-            while True:
-                #pepper.grab()
-                pepper.close_hand("RHand",0.0,1.0)
-                #pepper.close_hand("RHand",0.5,1.0)
+            if command == "grab":
+                pepper.close_hand(handName,0.0,1.0)
+            elif command == "open":
+                pepper.open_hand(handName,0.5,1.0)
+
         except KeyboardInterrupt:
+            pepper.motion_service.setStfnesses(handName,0)
             sys.exit
