@@ -10,6 +10,8 @@ import json
 import collections as cl
 import ndjson
 import random
+import functools
+
 
 class Authenticator:
 
@@ -61,7 +63,11 @@ class Pepper:
         self.autonomous_life = self.app.session.service("ALAutonomousLife")
         self.motion_service = self.app.session.service("ALMotion")
         self.posture_service = self.app.session.service("ALRobotPosture")
-
+        self.audio_service = self.app.session.service("ALAudioPlayer")
+        self.led_service = self.app.session.service("ALLeds")
+        self.memory_service = self.app.session.service("ALMemory")
+        
+        
     def AL_get(self):
         life_status = self.autonomous_life.getState()
         print("Life state is:{}".format(life_status))
@@ -71,6 +77,13 @@ class Pepper:
         self.autonomous_life.setState(state)
         print("Autonomous life has been {}".format(state))
 
+    def get_volume(self):
+        master_volume = self.audio_service.getMasterVolume()
+        print(master_volume)
+
+    def set_volume(self,value):
+        self.audio_service.setMasterVolume(value)
+        
     def init_pose(self):
         self.motion_service.setStiffnesses("Body",1.0)
         print("start to Stand Init")
@@ -187,6 +200,67 @@ class Pepper:
         time.sleep(0.3)
         self.motion_service.setStiffnesses("Body",0.0)
 
+    def play_sound(self,filename):
+        fileId = self.audio_service.loadFile(filename)
+        self.audio_service.play(fileId)
+
+    def help_sound(self):
+        filename = "/home/nao/aiko/pepper_sad.mp3"
+        self.play_sound(filename)
+
+    def happy_sound(self):
+        filename = "/home/nao/aiko/pepper_happy.mp3"
+        self.play_sound(filename)
+
+    def change_led(self,group,r,g,b,duraion):
+        self.led_service.fadeRGB(group,r,g,b,duraion)
+
+    def help_led(self):
+        group = "FaceLeds"
+        ##red, blue, green, orange, yellow, purple, pink
+        color_list = [[255,0,0],[0,0,255],[0,255,0],[255,140,0],[255,215,0],[128,0,128],[255,20,147]]
+        color = random.choice(color_list)
+        duration = 0.5
+        self.change_led(group,color[0],color[1],color[2],duration)
+
+    def happy_led(self):
+        pass
+
+    def waiting_touch(self):
+        self.touch = self.memory_service.subscriber("TouchChanged")
+        self.id = self.touch.signal.connect(functools.partial(self.onTouched,"TouchChanged"))
+        time.sleep(20)
+        
+    def onTouched(self, strVarName, value):
+        """ This will be called each time a touch
+        is detected.
+
+        """
+        # Disconnect to the event when talking,
+        # to avoid repetitions
+        self.touch.signal.disconnect(self.id)
+
+        touched_bodies = []
+        for p in value:
+            if p[1]:
+                touched_bodies.append(p[0])
+
+        self.detect_body(touched_bodies)
+        self.id = self.touch.signal.connect(functools.partial(self.onTouched, "TouchChanged"))
+
+    def detect_body(self,touched_bodies):
+        if (touched_bodies ==[]):
+            return
+        body = touched_bodies[0]
+        if body == "RArm":
+            time.sleep(2)
+            if self.motion_service.getStiffnesses("RArm") == 0:
+                change_led("FaceLeds",255,255,255,0.5)
+            else:
+                return
+        else:
+            return
+        
 # for python2 support
 # https://stackoverflow.com/questions/21731043/use-of-input-raw-input-in-python-2-and-3
 try:
@@ -204,7 +278,5 @@ if __name__ == "__main__":
     #pepper.AL_set("solitary")
     pepper.init_pose()
     while not command == "end":
-        json_name = os.path.join(os.path.dirname(os.path.realpath(__file__)),'..')+"/json/motion.json"
-        #pepper.soak_motion(json_name)
-        pepper.draw_motion(json_name)
+        pepper.draw_motion()
         command = input("please input start or end:") # command == は良くあるミス！
