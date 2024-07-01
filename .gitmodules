@@ -1,0 +1,3 @@
+[submodule "aruco/RealsenseArUcoTracking"]
+	path = aruco/RealsenseArUcoTracking
+	url = https://github.com/zptang1210/RealsenseArUcoTracking.git
