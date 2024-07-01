@@ -278,5 +278,6 @@ if __name__ == "__main__":
     #pepper.AL_set("solitary")
     pepper.init_pose()
     while not command == "end":
-        pepper.draw_motion()
+        json_name = os.path.join(os.path.dirname(os.path.realpath(__file__)),'..')+"/json/motion.json"
+        pepper.draw_motion(json_name)
         command = input("please input start or end:") # command == は良くあるミス！
