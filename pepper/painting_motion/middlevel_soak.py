@@ -226,12 +226,21 @@ class Pepper:
     def happy_led(self):
         pass
 
-    def waiting_touch(self):
+    def waiting_hand_touch(self):
         self.touch = self.memory_service.subscriber("TouchChanged")
-        self.id = self.touch.signal.connect(functools.partial(self.onTouched,"TouchChanged"))
+        self.id = self.touch.signal.connect(functools.partial(self.onhandTouched,"TouchChanged"))
+        self.detected_hand = False
+        time.sleep(20)
+        self.change_led("FaceLeds",255,255,255,0.5)
+    
+    def waiting_head_touch(self):
+        self.touch = self.memory_service.subscriber("TouchChanged")
+        self.id = self.touch.signal.connect(functools.partial(self.onheadTouched,"TouchChanged"))
+        self.detected_head = False
         time.sleep(20)
         
-    def onTouched(self, strVarName, value):
+
+    def onheadTouched(self, strVarName, value):
         """ This will be called each time a touch
         is detected.
 
@@ -245,20 +254,50 @@ class Pepper:
             if p[1]:
                 touched_bodies.append(p[0])
 
-        self.detect_body(touched_bodies)
-        self.id = self.touch.signal.connect(functools.partial(self.onTouched, "TouchChanged"))
+        self.detect_head(touched_bodies)
+        
+    def onhandTouched(self, strVarName, value):
+        """ This will be called each time a touch
+        is detected.
 
-    def detect_body(self,touched_bodies):
+        """
+        # Disconnect to the event when talking,
+        # to avoid repetitions
+        self.touch.signal.disconnect(self.id)
+
+        touched_bodies = []
+        for p in value:
+            if p[1]:
+                touched_bodies.append(p[0])
+
+        self.detect_hand(touched_bodies)
+
+    def detect_hand(self,touched_bodies):
         if (touched_bodies ==[]):
-            return
+            self.id = self.touch.signal.connect(functools.partial(self.onhandTouched, "TouchChanged"))
+            print("A")
+            return 
         body = touched_bodies[0]
         if body == "RArm":
-            time.sleep(2)
-            if self.motion_service.getStiffnesses("RArm") == 0:
-                change_led("FaceLeds",255,255,255,0.5)
-            else:
-                return
+            print("the right arm is touched")
+            self.detected_hand = True
+            self.change_led("FaceLeds",255,255,255,0.5)
+            return
         else:
+            print("D")
+            self.id = self.touch.signal.connect(functools.partial(self.onhandTouched, "TouchChanged"))
+            return
+
+    def detect_head(self,touched_bodies):
+        if (touched_bodies ==[]):
+            self.id = self.touch.signal.connect(functools.partial(self.onhandTouched, "TouchChanged"))
+            return
+        body = touched_bodies[0]
+        if body == "Head":
+            print("The head is touched")
+            self.detected_head = True
+        else:
+            self.id = self.touch.signal.connect(functools.partial(self.onhandTouched, "TouchChanged"))
             return
         
 # for python2 support
@@ -280,5 +319,8 @@ if __name__ == "__main__":
     while not command == "end":
         pepper.help_sound()
         pepper.help_led()
-        pepper.waiting_touch()
+        pepper.waiting_hand_touch()
+        pepper.waiting_head_touch()
+        if pepper.detected_head ==True:
+            pepper.happy_sound()
         command = input("please input start or end:") # command == は良くあるミス！
