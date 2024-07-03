@@ -66,7 +66,7 @@ class Pepper:
         self.audio_service = self.app.session.service("ALAudioPlayer")
         self.led_service = self.app.session.service("ALLeds")
         self.memory_service = self.app.session.service("ALMemory")
-        
+        self.blinking_service = self.app.session.service("ALAutonomousBlinking")
         
     def AL_get(self):
         life_status = self.autonomous_life.getState()
@@ -88,7 +88,8 @@ class Pepper:
         self.motion_service.setStiffnesses("Body",1.0)
         print("start to Stand Init")
         self.posture_service.goToPosture("Stand",1.0)
-        time.sleep(4)
+        self.blinking_service.setEnabled(True)
+        time.sleep(2)
         print("end up Stand Init")
 
     def soak_motion(self,json_name):
@@ -216,6 +217,7 @@ class Pepper:
         self.led_service.fadeRGB(group,r,g,b,duraion)
 
     def help_led(self):
+        self.blinking_service.setEnabled(False)
         group = "FaceLeds"
         ##red, blue, green, orange, yellow, purple, pink
         color_list = [[255,0,0],[0,0,255],[0,255,0],[255,140,0],[255,215,0],[128,0,128],[255,20,147]]
@@ -223,21 +225,36 @@ class Pepper:
         duration = 0.5
         self.change_led(group,color[0],color[1],color[2],duration)
 
-    def happy_led(self):
-        pass
-
     def waiting_hand_touch(self):
         self.touch = self.memory_service.subscriber("TouchChanged")
         self.id = self.touch.signal.connect(functools.partial(self.onhandTouched,"TouchChanged"))
         self.detected_hand = False
-        time.sleep(20)
+        for i in range(0,20):
+            if self.detected_hand == True:
+                print("exit waiting hand touch in 20 seconds")
+                time.sleep(20)
+                break
+            else:
+                time.sleep(1)
+                continue
+        print("exited waiting hand touch")
         self.change_led("FaceLeds",255,255,255,0.5)
+        self.blinking_service.setEnabled(True)
     
     def waiting_head_touch(self):
+        print("start waiting head touch")
         self.touch = self.memory_service.subscriber("TouchChanged")
         self.id = self.touch.signal.connect(functools.partial(self.onheadTouched,"TouchChanged"))
         self.detected_head = False
-        time.sleep(20)
+        for i in range(0,20):
+            if self.detected_head == True:
+                print("exit waiting head touch soon")
+                time.sleep(5)
+                break
+            else:
+                time.sleep(1)
+                continue
+        print("exited waiting head touch")
         
 
     def onheadTouched(self, strVarName, value):
@@ -275,16 +292,15 @@ class Pepper:
     def detect_hand(self,touched_bodies):
         if (touched_bodies ==[]):
             self.id = self.touch.signal.connect(functools.partial(self.onhandTouched, "TouchChanged"))
-            print("A")
             return 
         body = touched_bodies[0]
         if body == "RArm":
             print("the right arm is touched")
             self.detected_hand = True
+            self.motion_service.setStiffnesses("RArm",0.0)
             self.change_led("FaceLeds",255,255,255,0.5)
             return
         else:
-            print("D")
             self.id = self.touch.signal.connect(functools.partial(self.onhandTouched, "TouchChanged"))
             return
 
@@ -295,6 +311,12 @@ class Pepper:
         body = touched_bodies[0]
         if body == "Head":
             print("The head is touched")
+            self.motion_service.setStiffnesses("RArm",1.0)
+            i = 0
+            for i in range(0,2):
+                self.led_service.rotateEyes(0x00FFFFFF,1.0,0.5)
+                i=i+1
+            self.change_led("FaceLeds",255,255,255,0.5)
             self.detected_head = True
         else:
             self.id = self.touch.signal.connect(functools.partial(self.onhandTouched, "TouchChanged"))
@@ -316,11 +338,25 @@ if __name__ == "__main__":
         time.sleep(3.0)
     #pepper.AL_set("solitary")
     pepper.init_pose()
+    pepper.change_led("EarLeds",255,255,0,0.5)
+    time.sleep(1)
     while not command == "end":
-        pepper.help_sound()
-        pepper.help_led()
-        pepper.waiting_hand_touch()
-        pepper.waiting_head_touch()
-        if pepper.detected_head ==True:
-            pepper.happy_sound()
-        command = input("please input start or end:") # command == は良くあるミス！
+        ear_led = random.randint(0,1)
+        if ear_led == 0: #描くモードon
+            print("helping mode ON")
+            pepper.change_led("EarLeds",0,0,255,0.5)
+            pepper.help_sound()
+            pepper.help_led()
+            pepper.waiting_hand_touch()
+            pepper.waiting_head_touch()
+            if pepper.detected_head ==True:
+                json_name = os.path.join(os.path.dirname(os.path.realpath(__file__)),'..')+"/json/motion.json"
+                pepper.draw_motion(json_name)
+                pepper.happy_sound()
+            pepper.change_led("EarLeds",0,255,0,0.5)
+            time.sleep(10)
+        elif ear_led == 1:
+            wait_time = random.randint(15,30)
+            print("I will wait in {} seconds".format(wait_time))
+            time.sleep(wait_time)    
+        #command = input("please input start or end:") # command == は良くあるミス！
