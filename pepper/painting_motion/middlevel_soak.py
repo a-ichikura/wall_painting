@@ -213,6 +213,10 @@ class Pepper:
         filename = "/home/nao/aiko/pepper_happy.mp3"
         self.play_sound(filename)
 
+    def curious_sound(self):
+        filename = "/home/nao/aiko/pepper_curious.mp3"
+        self.play_sound(filename)
+
     def change_led(self,group,r,g,b,duraion):
         self.led_service.fadeRGB(group,r,g,b,duraion)
 
@@ -246,6 +250,7 @@ class Pepper:
         self.touch = self.memory_service.subscriber("TouchChanged")
         self.id = self.touch.signal.connect(functools.partial(self.onheadTouched,"TouchChanged"))
         self.detected_head = False
+        self.curious_sound()
         for i in range(0,20):
             if self.detected_head == True:
                 print("exit waiting head touch soon")
@@ -253,6 +258,7 @@ class Pepper:
                 break
             else:
                 time.sleep(1)
+                self.curious_sound()
                 continue
         print("exited waiting head touch")
         
@@ -340,9 +346,10 @@ if __name__ == "__main__":
     pepper.init_pose()
     pepper.change_led("EarLeds",255,255,0,0.5)
     time.sleep(1)
+    count = 1
     while not command == "end":
         ear_led = random.randint(0,1)
-        if ear_led == 0: #描くモードon
+        if ear_led == 0 or count == 3: #描くモードon
             print("helping mode ON")
             pepper.change_led("EarLeds",0,0,255,0.5)
             pepper.help_sound()
@@ -355,8 +362,10 @@ if __name__ == "__main__":
                 pepper.happy_sound()
             pepper.change_led("EarLeds",0,255,0,0.5)
             time.sleep(10)
-        elif ear_led == 1:
-            wait_time = random.randint(15,30)
+            count = 1
+        elif ear_led == 1 and count < 3:
+            wait_time = random.randint(15,20)
             print("I will wait in {} seconds".format(wait_time))
+            count = count +1
             time.sleep(wait_time)    
         #command = input("please input start or end:") # command == は良くあるミス！
