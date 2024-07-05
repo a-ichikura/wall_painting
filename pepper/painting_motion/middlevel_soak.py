@@ -46,6 +46,7 @@ class AuthenticatorFactory:
 #1;5202;0c# session.setClientAuthenticatorFactory(factory)
 # session.connect("tcp://192.168.1.59:9503")
 
+
 class Pepper:
 
     def __init__(self):
@@ -54,19 +55,33 @@ class Pepper:
         # naoqi 2.5 have following erros
         #
         # AttributeError: 'Object' object has no attribute 'setClientAuthenticatorFactory'
-        self.app = qi.Application(sys.argv, url="tcps://10.0.0.4:9503")
-        logins = ("nao", "nao")
-        factory = AuthenticatorFactory(*logins)
-        self.app.session.setClientAuthenticatorFactory(factory)
-        #
-        self.app.start()
-        self.autonomous_life = self.app.session.service("ALAutonomousLife")
-        self.motion_service = self.app.session.service("ALMotion")
-        self.posture_service = self.app.session.service("ALRobotPosture")
-        self.audio_service = self.app.session.service("ALAudioPlayer")
-        self.led_service = self.app.session.service("ALLeds")
-        self.memory_service = self.app.session.service("ALMemory")
-        self.blinking_service = self.app.session.service("ALAutonomousBlinking")
+        version = sys.argv[1]
+        ip = sys.argv[2]
+        if version == "2.9":
+            url = "tcps://" + ip + ":9503"
+            self.app = qi.Application(sys.argv, url=url)
+            logins = ("nao", "nao")
+            factory = AuthenticatorFactory(*logins)
+            self.app.session.setClientAuthenticatorFactory(factory)
+            self.app.start()
+            self.autonomous_life = self.app.session.service("ALAutonomousLife")
+            self.motion_service = self.app.session.service("ALMotion")
+            self.posture_service = self.app.session.service("ALRobotPosture")
+            self.audio_service = self.app.session.service("ALAudioPlayer")
+            self.led_service = self.app.session.service("ALLeds")
+            self.memory_service = self.app.session.service("ALMemory")
+            self.blinking_service = self.app.session.service("ALAutonomousBlinking")
+        elif version == "2.5":
+            url = "tcp://" + ip + ":9559"
+            self.session = qi.Session()
+            self.session.connect(url)
+            self.autonomous_life = self.session.service("ALAutonomousLife")
+            self.motion_service = self.session.service("ALMotion")
+            self.posture_service = self.session.service("ALRobotPosture")
+            self.audio_service = self.session.service("ALAudioPlayer")
+            self.led_service = self.session.service("ALLeds")
+            self.memory_service = self.session.service("ALMemory")
+            self.blinking_service = self.session.service("ALAutonomousBlinking")
         
     def AL_get(self):
         life_status = self.autonomous_life.getState()
@@ -87,7 +102,7 @@ class Pepper:
     def init_pose(self):
         self.motion_service.setStiffnesses("Body",1.0)
         print("start to Stand Init")
-        self.posture_service.goToPosture("Stand",1.0)
+        self.posture_service.goToPosture("Stand",1.5)
         self.blinking_service.setEnabled(True)
         time.sleep(2)
         print("end up Stand Init")
