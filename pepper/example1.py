@@ -28,7 +28,7 @@ class AuthenticatorFactory:
         return Authenticator(self.username, self.password)
 
 # Connect to the robot fails at app.start() => RuntimeError: disconnected
-app = qi.Application(sys.argv, url="tcps://10.0.0.4:9503")
+app = qi.Application(sys.argv, url="tcps://10.0.0.5:9559")
 logins = ("nao", "nao")
 factory = AuthenticatorFactory(*logins)
 app.session.setClientAuthenticatorFactory(factory)
@@ -42,5 +42,4 @@ print("started")
 # session.setClientAuthenticatorFactory(factory)
 # session.connect("tcp://192.168.1.59:9503")
 
-tts = app.session.service("ALTextToSpeech")
-tts.say("Hello there!")
+app.session.service("ALTabletService")

@@ -57,13 +57,12 @@ class Pepper:
         version = sys.argv[1]
         ip = sys.argv[2]
         if version == "2.9":
-            url = "tcps://" + ip + ":9443"
+            url = "tcps://" + ip + ":9503"
             self.app = qi.Application(sys.argv, url=url)
             logins = ("nao", "nao")
             factory = AuthenticatorFactory(*logins)
             self.app.session.setClientAuthenticatorFactory(factory)
             self.app.start()
-            self.app.session.service("ALTracker")
             self.autonomous_life = self.app.session.service("ALAutonomousLife")
             self.motion_service = self.app.session.service("ALMotion")
             self.posture_service = self.app.session.service("ALRobotPosture")
