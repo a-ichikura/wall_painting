@@ -15,6 +15,11 @@ import asyncio
 import logging
 from core import Pepper
 
+try:
+    input = raw_input
+except NameError:
+    pass
+
 if __name__ == "__main__":
     print("started")
     pepper = Pepper()
@@ -24,9 +29,6 @@ if __name__ == "__main__":
         time.sleep(3.0)
     #pepper.AL_set("solitary")
     pepper.init_pose()
-    ##start tracking
-
-    pepper.motion_service.setExternalCollisionProtectionEnabled("RArm",False)
     pepper.change_led("EarLeds",255,255,0,0.5)
     time.sleep(1)
     count = 1
@@ -35,22 +37,23 @@ if __name__ == "__main__":
         if ear_led == 0 or count == 3: #描くモードon
             print("helping mode ON")
             pepper.change_led("EarLeds",0,0,255,0.5)
-            json_name = os.path.join(os.path.dirname(os.path.realpath(__file__)),'..')+"/json/motion.json"
-            pepper.curious_sound()
-            pepper.soak_motion(json_name)
-            pepper.draw_motion(json_name)
-            pepper.happy_sound()
+            pepper.help_sound()
+            pepper.help_led()
+            pepper.waiting_hand_touch()
+            pepper.waiting_head_touch()
+            if pepper.detected_head ==True:
+                pepper.motion_service.setStiffnesses("Body",1.0)
+                print("start to Stand Init")
+                pepper.posture_service.goToPosture("Stand",1.0)
+                pepper.blinking_service.setEnabled(True)
+                time.sleep(2)
+                print("end up Stand Init")
+                pepper.happy_sound()
             pepper.change_led("EarLeds",0,255,0,0.5)
             time.sleep(10)
-
-            
-            time.sleep(0.5)
             count = 1
-            
         elif ear_led == 1 and count < 3:
             wait_time = random.randint(15,20)
             print("I will wait in {} seconds".format(wait_time))
             count = count +1
-            time.sleep(wait_time)
-        
-            time.sleep(0.5)
+            time.sleep(wait_time)    

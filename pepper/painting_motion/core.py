@@ -11,7 +11,8 @@ import collections as cl
 import ndjson
 import random
 import functools
-
+import asyncio
+import logging
 
 class Authenticator:
 
@@ -45,6 +46,7 @@ class AuthenticatorFactory:
 # factory = AuthenticatorFactory(*logins)
 #1;5202;0c# session.setClientAuthenticatorFactory(factory)
 # session.connect("tcp://192.168.1.59:9503")
+
 
 class Pepper:
 
@@ -338,73 +340,11 @@ class Pepper:
         else:
             self.id = self.touch.signal.connect(functools.partial(self.onhandTouched, "TouchChanged"))
             return
-        
+
+
 # for python2 support
 # https://stackoverflow.com/questions/21731043/use-of-input-raw-input-in-python-2-and-3
 try:
     input = raw_input
 except NameError:
     pass
-
-if __name__ == "__main__":
-    print("started")
-    pepper = Pepper()
-    command = input("please enter your command:")
-    if pepper.AL_get() != "disabled":
-        pepper.AL_set("disabled")
-        time.sleep(3.0)
-    #pepper.AL_set("solitary")
-
-    pepper.init_pose()
-
-    con_mng_service = pepper.app.session.service("ALSonar")
-
-    ##start tracking
-    targetName = "People"
-    mode = "Head"
-    pepper.tracker_service.registerTarget(targetName,0.1)
-    pepper.tracker_service.setMode(mode)
-    pepper.tracker_service.track(targetName)
-    
-    pepper.motion_service.setExternalCollisionProtectionEnabled("RArm",False)
-    pepper.change_led("EarLeds",255,255,0,0.5)
-    time.sleep(1)
-    count = 1
-    while not command == "end":
-        ear_led = random.randint(0,1)
-        if ear_led == 0 or count == 3: #描くモードon
-            print("helping mode ON")
-            pepper.change_led("EarLeds",0,0,255,0.5)
-            json_name = os.path.join(os.path.dirname(os.path.realpath(__file__)),'..')+"/json/motion.json"
-            pepper.curious_sound()
-            pepper.soak_motion(json_name)
-            pepper.draw_motion(json_name)
-            pepper.happy_sound()
-            pepper.change_led("EarLeds",0,255,0,0.5)
-            time.sleep(10)
-
-            pepper.tracker_service.stopTracker()
-            pepper.tracker_service.unregisterAllTargets()
-            
-            time.sleep(0.5)
-            
-            pepper.tracker_service.registerTarget(targetName,0.1)
-            pepper.tracker_service.setMode(mode)
-            pepper.tracker_service.track(targetName)
-            count = 1
-            
-        elif ear_led == 1 and count < 3:
-            wait_time = random.randint(15,20)
-            print("I will wait in {} seconds".format(wait_time))
-            count = count +1
-            time.sleep(wait_time)
-            
-            pepper.tracker_service.stopTracker()
-            pepper.tracker_service.unregisterAllTargets()
-            
-            time.sleep(0.5)
-            
-            pepper.tracker_service.registerTarget(targetName,0.1)
-            pepper.tracker_service.setMode(mode)
-            pepper.tracker_service.track(targetName)
-        #command = input("please input start or end:") # command == は良くあるミス！
