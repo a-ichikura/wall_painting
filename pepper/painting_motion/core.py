@@ -73,7 +73,7 @@ class Pepper:
             self.memory_service = self.app.session.service("ALMemory")
             self.blinking_service = self.app.session.service("ALAutonomousBlinking")
             self.tts_service = self.app.session.service("ALTextToSpeech")
-            
+            self.human_awareness = self.app.session.service("HumanAwareness")
         elif version == "2.5":
             url = "tcp://" + ip + ":9559"
             self.session = qi.Session()
