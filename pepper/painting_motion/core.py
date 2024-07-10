@@ -72,7 +72,7 @@ class Pepper:
             self.led_service = self.app.session.service("ALLeds")
             self.memory_service = self.app.session.service("ALMemory")
             self.blinking_service = self.app.session.service("ALAutonomousBlinking")
-            
+            self.tts_service = self.app.session.service("ALTextToSpeech")
             
         elif version == "2.5":
             url = "tcp://" + ip + ":9559"
@@ -85,7 +85,12 @@ class Pepper:
             self.led_service = self.session.service("ALLeds")
             self.memory_service = self.session.service("ALMemory")
             self.blinking_service = self.session.service("ALAutonomousBlinking")
-            
+            self.tts_service = self.app.session.service("ALTextToSpeech")
+
+        self.tts_service.setVolume(0.5)
+        self.tts_service.setParameter("pitchShift",1.4)
+        self.tts_service.setParameter("speed",50)
+        
     def AL_get(self):
         life_status = self.autonomous_life.getState()
         print("Life state is:{}".format(life_status))
@@ -105,7 +110,7 @@ class Pepper:
     def init_pose(self):
         self.motion_service.setStiffnesses("Body",1.0)
         print("start to Stand Init")
-        self.posture_service.goToPosture("Stand",1.5)
+        self.posture_service.goToPosture("Stand",2)
         self.blinking_service.setEnabled(True)
         time.sleep(2)
         print("end up Stand Init")
@@ -196,17 +201,37 @@ class Pepper:
                 head_angle_list = [-0.4,-0.15]
         self.motion_service.angleInterpolation("Head",head_angle_list,head_time_list,True)
         #print(self.motion_service.getStiffnesses("Body"))
-        ##今のjoint_nameのアングルを得る
+
         #print("{} {}".format(joint_name, ["{:5.2f}".format(x) for x in self.motion_service.getAngles(joint_name, False)]))
-        ## time_listを表示する ＝　何個アングルが入っているかを見る
+        
         time_list = [0.4*(i+1) for i in range(len(angles_list))]
         #print("{} -> time_list {}".format(joint_name, time_list))
 
-        ##time_listにangles_listをかける
         #print([time_list]*len(angles_list))
         # 多分これでいい気がするけど，実機で確認が必要
         # https://stackoverflow.com/questions/6473679/transpose-list-of-lists
-        self.motion_service.angleInterpolation(joint_name,list(map(list, zip(*angles_list))),[time_list]*len(angles_list),True)
+        #1秒ずつくらいにわけてリストを送る 3分割すればよいのでは？
+        print("time:\n{}".format(time_list))
+        print("angles:\n{}".format(angles_list))
+        num = 10
+        devided_time_list = time_list[:num]
+        for i in range((len(time_list)//num)+1):
+            print(i)
+            if i != len(time_list)//num:
+                devided_angles_list = angles_list[i*num:(i+1)*num]
+                #print("d_time:\n{}".format(devided_time_list))
+                #print("d_angles:\n{}".format(devided_angles_list))
+                #print("d_zip:\n{}".format(list(map(list,zip(*devided_angles_list)))))
+            elif i == len(time_list)//num:
+                devided_time_list = devided_time_list[:(len(time_list)%num)]
+                devided_angles_list = angles_list[i*num:]
+            try:
+                self.motion_service.angleInterpolation(joint_name,list(zip(*devided_angles_list)),[devided_time_list]*(len(devided_angles_list[0])),True)
+            except:
+                pass
+            self.sing_sound()
+        #self.motion_service.angleInterpolation(joint_name,list(map(list, zip(*angles_list))),[time_list]*len(angles_list),True)
+        
         #print("     {}".format(["{:5.2f}".format(x) for x in self.motion_service.getAngles(joint_name, False)]))
 
         print("end up {}".format(motion_name))
@@ -219,11 +244,16 @@ class Pepper:
         self.audio_service.play(fileId)
 
     def help_sound(self):
-        filename = "/home/nao/aiko/pepper_sad.mp3"
+        filename = "/home/nao/aiko/pepper_so_sad.mp3"
         self.play_sound(filename)
 
     def happy_sound(self):
         filename = "/home/nao/aiko/pepper_happy.mp3"
+        self.play_sound(filename)
+
+    def sing_sound(self):
+        num = ["","2","3"]
+        filename = "/home/nao/aiko/pepper_whistling" + random.choice(num) + ".mp3"
         self.play_sound(filename)
 
     def curious_sound(self):
@@ -236,12 +266,22 @@ class Pepper:
     def help_led(self):
         self.blinking_service.setEnabled(False)
         group = "FaceLeds"
-        ##red, blue, green, orange, yellow, purple, pink
-        color_list = [[255,0,0],[0,0,255],[0,255,0],[255,140,0],[255,215,0],[128,0,128],[255,20,147]]
-        color = random.choice(color_list)
+        ##red, blue, yellow
+        color_list = ["red","blue","yellow"]
+        self.color = random.choice(color_list)
+        if self.color == "red":
+            color_rgb = [255,0,0]
+        elif self.color == "blue":
+            color_rgb = [0,0,255]
+        elif self.color == "yellow":
+            color_rgb = [255,215,0]
         duration = 0.5
-        self.change_led(group,color[0],color[1],color[2],duration)
+        self.change_led(group,color_rgb[0],color_rgb[1],color_rgb[2],duration)
 
+    def say_color(self):
+        self.tts_service.say(self.color + "!")
+        time.sleep(1)
+        
     def waiting_hand_touch(self):
         self.touch = self.memory_service.subscriber("TouchChanged")
         self.id = self.touch.signal.connect(functools.partial(self.onhandTouched,"TouchChanged"))
@@ -252,6 +292,7 @@ class Pepper:
                 time.sleep(20)
                 break
             else:
+                self.say_color()
                 time.sleep(1)
                 continue
         print("exited waiting hand touch")
