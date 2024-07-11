@@ -229,6 +229,7 @@ class Pepper:
                 self.motion_service.angleInterpolation(joint_name,list(zip(*devided_angles_list)),[devided_time_list]*(len(devided_angles_list[0])),True)
             except:
                 pass
+            self.look_change()
             self.sing_sound()
         #self.motion_service.angleInterpolation(joint_name,list(map(list, zip(*angles_list))),[time_list]*len(angles_list),True)
         
@@ -239,6 +240,19 @@ class Pepper:
         time.sleep(0.3)
         self.motion_service.setStiffnesses("Body",0.0)
 
+    def look(self,head_angle_list):
+        print("start to look at the interactor child")
+        self.motion_service.setStiffnesses("Body",1.0)
+
+        head_time_list = [0.7,0.7]
+        self.motion_service.angleInterpolation("Head",head_angle_list,head_time_list,True)
+
+    def look_change(self):
+        print("start to change the head position")
+        speed = 0.05
+        changes = [round(random.uniform(0.15,-0.2),2),round(random.uniform(0.1,-0.1),2)]
+        self.motion_service.changeAngles("Head",changes,speed)
+        
     def play_sound(self,filename):
         fileId = self.audio_service.loadFile(filename)
         self.audio_service.play(fileId)
@@ -288,8 +302,31 @@ class Pepper:
         self.detected_hand = False
         for i in range(0,20):
             if self.detected_hand == True:
+                self.look([-0.9,0.25])
                 print("exit waiting hand touch in 20 seconds")
                 time.sleep(20)
+                break
+            else:
+                self.say_color()
+                time.sleep(1)
+                continue
+        print("exited waiting hand touch")
+        self.change_led("FaceLeds",255,255,255,0.5)
+        self.blinking_service.setEnabled(True)
+
+    def waiting_hand_touch_low(self):
+        self.touch = self.memory_service.subscriber("TouchChanged")
+        self.id = self.touch.signal.connect(functools.partial(self.onhandTouched,"TouchChanged"))
+        self.detected_hand = False
+        for i in range(0,20):
+            if self.detected_hand == True:
+                self.look([-0.9,0.25])
+                print("exit waiting hand touch in 70 seconds")
+                time.sleep(20)
+                self.look([0,0])
+                for l in range(0,5):
+                    time.sleep(10)
+                    self.look_change()
                 break
             else:
                 self.say_color()

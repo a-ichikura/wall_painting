@@ -32,10 +32,11 @@ if __name__ == "__main__":
     count = 1
     while not command == "end":
         ear_led = random.randint(0,1)
-        if ear_led == 0 or count == 3: #描くモードon
+        if ear_led == 0 or count == 1: #drawing mode on
             print("helping mode ON")
-            pepper.change_led("EarLeds",0,0,255,0.5)
             pepper.help_sound()
+            pepper.look([-1.2,0.25])
+            pepper.change_led("EarLeds",0,0,255,0.5)
             pepper.help_led()
             pepper.waiting_hand_touch()
             pepper.waiting_head_touch()
