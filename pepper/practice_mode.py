@@ -64,6 +64,13 @@ class Pepper:
         self.autonomous_life.setState(state)
         print("Autonomous life has been {}".format(state))
 
+    def init_pose(self):
+        self.motion_service.setStiffnesses("Body",1.0)
+        print("start to Stand Init")
+        self.posture_service.goToPosture("Stand",1.0)
+        time.sleep(3)
+        print("end up Stand Init")
+        
     def get_angles(self,name):
         angles = self.motion_service.getAngles(name,False)
         print(angles)
@@ -151,8 +158,9 @@ if __name__ == "__main__":
     if pepper.AL_get() != "disabled":
         pepper.AL_set("disabled")
         time.sleep(3.0)
+    pepper.init_pose()
     pepper.motion_service.setStiffnesses("Head",0.0)
-    pepper.motion_service.setStiffnesses("Body",0.0)
+    pepper.motion_service.setStiffnesses("RArm",0.0)
     while not command == "end":
         # default RARM といっても、リターン押すとエラーにならない？
         joint_name = input("please enter the joint name.\n default = RArm:") or "RArm"

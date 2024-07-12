@@ -36,7 +36,6 @@ class AuthenticatorFactory:
     # the `initialAuthData` method.
     def newAuthenticator(self):
         return Authenticator(self.username, self.password)
-
 # Connect to the robot fails at app.start() => RuntimeError: disconnected
 
 
@@ -74,6 +73,8 @@ class Pepper:
             self.blinking_service = self.app.session.service("ALAutonomousBlinking")
             self.tts_service = self.app.session.service("ALTextToSpeech")
             self.human_awareness = self.app.session.service("HumanAwareness")
+            self.basic_awareness = self.app.session.service("BasicAwareness")
+            
         elif version == "2.5":
             url = "tcp://" + ip + ":9559"
             self.session = qi.Session()
@@ -143,13 +144,15 @@ class Pepper:
         #print("     {}".format(["{:5.2f}".format(x) for x in self.motion_service.getAngles(joint_name, False)]))
 
         print("end up {}".format(motion_name))
-        self.init_pose()
+
         time.sleep(0.3)
         self.motion_service.setStiffnesses("Body",0.0)
 
     def draw_motion(self,json_name):
+        self.look([0,0])
         print("start to move its arm to paint")
-        motion_name = "draw"
+        motion_list = ["draw","draw_2","draw_3"]
+        motion_name = random.choice(motion_list)
         with open(json_name) as f:
             data = ndjson.load(f)
 

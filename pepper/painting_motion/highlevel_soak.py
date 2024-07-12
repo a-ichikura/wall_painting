@@ -16,13 +16,6 @@ import logging
 from core import Pepper
 
 #これでframeの変化を求められそう
-def print_human(humans):
-    try:
-        human = humans[0]
-        frame = human.headFrame.value()
-        print(frame)
-    except IndexError as e:
-        print("no human")
     
 if __name__ == "__main__":
     print("started")
@@ -31,13 +24,8 @@ if __name__ == "__main__":
     if pepper.AL_get() != "disabled":
         pepper.AL_set("disabled")
         time.sleep(3.0)
-    #pepper.AL_set("solitary")
-    #humansAround = pepper.human_awareness.humansAround
-    #humans = humansAround.value()
-    #humansAround.connect(lambda humans: print_human(humans))
     
     pepper.init_pose()
-    ##start tracking
 
     pepper.motion_service.setExternalCollisionProtectionEnabled("RArm",False)
     pepper.change_led("EarLeds",255,255,0,0.5)
@@ -55,7 +43,6 @@ if __name__ == "__main__":
             pepper.happy_sound()
             pepper.change_led("EarLeds",0,255,0,0.5)
             time.sleep(10)
-
             
             time.sleep(0.5)
             count = 1
