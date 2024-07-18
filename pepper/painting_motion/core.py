@@ -307,7 +307,7 @@ class Pepper:
             if self.detected_hand == True:
                 self.look([-0.9,0.25])
                 print("exit waiting hand touch in 20 seconds")
-                time.sleep(20)
+                time.sleep(10)
                 break
             else:
                 self.say_color()
@@ -324,10 +324,10 @@ class Pepper:
         for i in range(0,20):
             if self.detected_hand == True:
                 self.look([-0.9,0.25])
-                print("exit waiting hand touch in 70 seconds")
-                time.sleep(20)
+                print("exit waiting hand touch in 50 seconds")
+                time.sleep(10)
                 self.look([0,0])
-                for l in range(0,5):
+                for l in range(0,4):
                     time.sleep(10)
                     self.look_change()
                 break
@@ -406,7 +406,7 @@ class Pepper:
 
     def detect_head(self,touched_bodies):
         if (touched_bodies ==[]):
-            self.id = self.touch.signal.connect(functools.partial(self.onhandTouched, "TouchChanged"))
+            self.id = self.touch.signal.connect(functools.partial(self.onheadTouched, "TouchChanged"))
             return
         body = touched_bodies[0]
         if body == "Head":
@@ -419,7 +419,7 @@ class Pepper:
             self.change_led("FaceLeds",255,255,255,0.5)
             self.detected_head = True
         else:
-            self.id = self.touch.signal.connect(functools.partial(self.onhandTouched, "TouchChanged"))
+            self.id = self.touch.signal.connect(functools.partial(self.onheadTouched, "TouchChanged"))
             return
 
 

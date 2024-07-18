@@ -44,9 +44,10 @@ if __name__ == "__main__":
                 json_name = os.path.join(os.path.dirname(os.path.realpath(__file__)),'..')+"/json/motion.json"
                 pepper.draw_motion(json_name)
                 pepper.happy_sound()
-            pepper.change_led("EarLeds",0,255,0,0.5)
-            time.sleep(10)
-            count = 1
+                pepper.change_led("EarLeds",0,255,0,0.5)
+                time.sleep(10)
+                count = 1
+                command = input("please enter your command:")
         elif ear_led == 1 and count < 3:
             wait_time = random.randint(15,20)
             print("I will wait in {} seconds".format(wait_time))

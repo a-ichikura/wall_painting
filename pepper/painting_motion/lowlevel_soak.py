@@ -27,7 +27,7 @@ if __name__ == "__main__":
     count = 1
     while not command == "end":
         ear_led = random.randint(0,1)
-        if ear_led == 0 or count == 3: #drawing mode on
+        if ear_led == 0 or count == 1: #drawing mode on
             print("helping mode ON")
             pepper.help_sound()
             pepper.look([-1.2,0.25])
@@ -46,6 +46,7 @@ if __name__ == "__main__":
             pepper.change_led("EarLeds",0,255,0,0.5)
             time.sleep(10)
             count = 1
+            command = input("please enter your command:")
         elif ear_led == 1 and count < 3:
             wait_time = random.randint(15,20)
             print("I will wait in {} seconds".format(wait_time))

@@ -81,6 +81,13 @@ class Pepper:
         self.tts_service.setVolume(0.5)
         self.tts_service.setParameter("pitchShift",1.4)
         self.tts_service.setParameter("speed",50)
+        s = [self.app.session.service("ALAutonomousLife"), self.app.session.service("BasicAwareness")]
+        for i in range(len(s)):
+            print("line {}".format(i+1))
+            x = s[i]
+            print(x)
+            print(dir(x))
+            #print(x.getMethodList())
         
     def AL_get(self):
         life_status = self.autonomous_life.getState()
@@ -111,7 +118,8 @@ def print_human(pepper,humans):
     try:
         human = humans[0]
         print(dir(humans[0]))
-        frame = human.headFrame
+        frame = human.headFrame.value()
+        print(human.headFrame.value())
         pepper.motion_service._lookAt(frame)
     except IndexError as e:
         print("no human")
@@ -124,7 +132,6 @@ if __name__ == "__main__":
         pepper.AL_set("disabled")
         time.sleep(3.0)
 
-    pepper.basic_awareness.setTrackingMode("Head")
     #pepper.AL_set("solitary")
     humansAround = pepper.human_awareness.humansAround
     humans = humansAround.value()

@@ -33,12 +33,16 @@ if __name__ == "__main__":
     count = 1
     while not command == "end":
         ear_led = random.randint(0,1)
-        if ear_led == 0 or count == 1: #drawing mode on
+        if ear_led == 0 or count == 3: #drawing mode on
             print("helping mode ON")
             pepper.change_led("EarLeds",0,0,255,0.5)
             json_name = os.path.join(os.path.dirname(os.path.realpath(__file__)),'..')+"/json/motion.json"
             pepper.curious_sound()
+            pepper.help_led()
             pepper.soak_motion(json_name)
+            pepper.change_led("FaceLeds",255,255,255,0.5)
+            pepper.look([0,0])
+            time.sleep(3)
             pepper.draw_motion(json_name)
             pepper.happy_sound()
             pepper.change_led("EarLeds",0,255,0,0.5)
