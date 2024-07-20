@@ -88,7 +88,7 @@ class Pepper:
             self.blinking_service = self.session.service("ALAutonomousBlinking")
             self.tts_service = self.app.session.service("ALTextToSpeech")
 
-        self.tts_service.setVolume(0.5)
+        self.tts_service.setVolume(0.8)
         self.tts_service.setParameter("pitchShift",1.4)
         self.tts_service.setParameter("speed",50)
         
@@ -330,6 +330,7 @@ class Pepper:
                 for l in range(0,4):
                     time.sleep(10)
                     self.look_change()
+                    self.sing_sound()
                 break
             else:
                 self.say_color()
