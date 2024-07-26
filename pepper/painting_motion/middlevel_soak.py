@@ -27,6 +27,7 @@ if __name__ == "__main__":
         time.sleep(3.0)
     #pepper.AL_set("solitary")
     pepper.init_pose()
+    pepper.motion_service.setExternalCollisionProtectionEnabled("RArm",False)
     pepper.change_led("EarLeds",255,255,0,0.5)
     time.sleep(1)
     count = 1
