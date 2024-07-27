@@ -284,10 +284,10 @@ class Pepper:
         self.blinking_service.setEnabled(False)
         group = "FaceLeds"
         ##red, blue, yellow
-        color_list = ["red","blue","yellow"]
+        color_list = ["pink","blue","yellow"]
         self.color = random.choice(color_list)
-        if self.color == "red":
-            color_rgb = [255,0,0]
+        if self.color == "pink":
+            color_rgb = [255,51,255]
         elif self.color == "blue":
             color_rgb = [0,0,255]
         elif self.color == "yellow":
