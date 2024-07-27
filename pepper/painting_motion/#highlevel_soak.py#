@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env pythonend
 # -*- coding: utf-8 -*-
 
 
@@ -39,7 +39,6 @@ if __name__ == "__main__":
             json_name = os.path.join(os.path.dirname(os.path.realpath(__file__)),'..')+"/json/motion.json"
             pepper.curious_sound()
             pepper.help_led()
-            pepper.say_color()
             pepper.soak_motion(json_name)
             pepper.change_led("FaceLeds",255,255,255,0.5)
             pepper.look([0,0])

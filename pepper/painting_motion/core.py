@@ -298,6 +298,9 @@ class Pepper:
     def say_color(self):
         self.tts_service.say(self.color + "!")
         time.sleep(1)
+
+    def say_okay(self):
+        self.tts_service.say("OK!")
         
     def waiting_hand_touch(self):
         self.touch = self.memory_service.subscriber("TouchChanged")
@@ -416,6 +419,7 @@ class Pepper:
             i = 0
             for i in range(0,2):
                 self.led_service.rotateEyes(0x00FFFFFF,1.0,0.5)
+                self.say_okay()
                 i=i+1
             self.change_led("FaceLeds",255,255,255,0.5)
             self.detected_head = True
